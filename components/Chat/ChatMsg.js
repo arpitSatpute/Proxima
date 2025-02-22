@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, FlatList } from 'react-native';
 import webSocketService from './websocketService';
 
-const Chat = ({ userId }) => {
+const ChatMsg = ({ userId }) => {
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState('');
 
@@ -45,4 +45,4 @@ const Chat = ({ userId }) => {
   );
 };
 
-export default Chat;
+export default ChatMsg;

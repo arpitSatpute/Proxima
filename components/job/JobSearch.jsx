@@ -153,6 +153,11 @@ const JobSearch = () => {
 
   return (
     <View style={styles.container}>
+      <View style={styles.searchContainer}>
+        <TouchableOpacity style={styles.postButton}>
+          <Text style={styles.postIcon}>+</Text>
+        </TouchableOpacity>
+      </View>
       <TextInput
         style={styles.searchInput}
         placeholder="Search jobs..."
@@ -160,7 +165,7 @@ const JobSearch = () => {
         value={searchQuery}
         onChangeText={setSearchQuery}
       />
-      <ScrollView  style={styles.jobList}>
+      <ScrollView showsVerticalScrollIndicator={false}   style={styles.jobList}>
         {loading ? (
           <Text style={styles.loadingText}>Loading...</Text>
         ) : error ? (
