@@ -1,14 +1,14 @@
 import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
 
-const CollegeDash = () => {
+const AdminDash = () => {
   return (
     <View>
-      <Text>CollegeDash</Text>
+      <Text>AdminDash</Text>
     </View>
   )
 }
 
-export default CollegeDash
+export default AdminDash
 
 const styles = StyleSheet.create({})

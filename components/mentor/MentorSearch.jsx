@@ -168,6 +168,7 @@ const MentorSearch = ({ navigation }) => {
         <ErrorState error={error} onRetry={() => window.location.reload()} />
       ) : filteredMentors.length > 0 ? (
         <FlatList
+          showsVerticalScrollIndicator={false}
           data={filteredMentors}
           renderItem={({ item }) => <MentorCard mentor={item} navigation={navigation} />}
           keyExtractor={(item) => item.id.toString()}

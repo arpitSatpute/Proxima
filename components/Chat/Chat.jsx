@@ -1,206 +1,226 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, TextInput, FlatList, TouchableOpacity, SafeAreaView } from 'react-native';
+import React, { useState } from 'react';
+import {
+  StyleSheet,
+  View,
+  Text,
+  TextInput,
+  FlatList,
+  TouchableOpacity,
+  KeyboardAvoidingView,
+  Platform
+} from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import webSocketService from './websocketService';
 
-const ChatMessage = ({ message, isOwnMessage }) => (
-  <View style={[styles.messageContainer, isOwnMessage ? styles.ownMessage : styles.otherMessage]}>
-    <Text style={styles.messageText}>{message.content}</Text>
-    <Text style={styles.timestamp}>
-      {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-    </Text>
-  </View>
-);
-
-const Chat = ({ userId }) => {
-  const [messages, setMessages] = useState([]);
-  const [messageText, setMessageText] = useState('');
-  const [conversations, setConversations] = useState([
-    { id: 1, name: 'John Doe', lastMessage: 'Hey there!' },
-    { id: 2, name: 'Jane Smith', lastMessage: 'How are you?' },
+const ContactList = ({ onSelectContact }) => {
+  const [contacts] = useState([
+    { id: '1', name: 'John Doe', lastMessage: 'Hey, how are you?' },
+    { id: '2', name: 'Jane Smith', lastMessage: 'Meeting at 3pm' },
+    { id: '3', name: 'Mike Johnson', lastMessage: 'Thanks for your help!' },
   ]);
-  const [selectedChat, setSelectedChat] = useState(null);
 
-  useEffect(() => {
-    webSocketService.connect((msg) => {
-      const newMessage = JSON.parse(msg.body);
-      setMessages((prevMessages) => [...prevMessages, newMessage]);
-    });
+  const renderContact = ({ item }) => (
+    <TouchableOpacity 
+      style={styles.contactItem}
+      onPress={() => onSelectContact(item)}
+    >
+      <View style={styles.contactAvatar}>
+        <Text style={styles.avatarText}>{item.name[0]}</Text>
+      </View>
+      <View style={styles.contactInfo}>
+        <Text style={styles.contactName}>{item.name}</Text>
+        <Text style={styles.lastMessage}>{item.lastMessage}</Text>
+      </View>
+    </TouchableOpacity>
+  );
 
-    return () => {
-      // Cleanup websocket connection
-      webSocketService.disconnect();
-    };
-  }, []);
+  return (
+    <View style={styles.contactListContainer}>
+      <FlatList
+        data={contacts}
+        renderItem={renderContact}
+        keyExtractor={item => item.id}
+        style={styles.contactList}
+      />
+    </View>
+  );
+};
+
+const Chat = () => {
+  const [message, setMessage] = useState('');
+  const [messages, setMessages] = useState([]);
+  const [selectedContact, setSelectedContact] = useState(null);
 
   const sendMessage = () => {
-    if (!messageText.trim()) return;
-
-    const chatMessage = {
-      senderId: userId,
-      receiverId: selectedChat?.id || 'receiver-id', // Ensure receiverId is set correctly
-      content: messageText, // Use messageText instead of message
-      timestamp: new Date().getTime(),
-    };
-
-    webSocketService.sendMessage('/app/sendPrivateMessage', chatMessage);
-    setMessageText(''); // Clear the input after sending
+    if (message.trim().length > 0) {
+      setMessages([
+        ...messages,
+        {
+          id: Math.random().toString(),
+          text: message,
+          sender: 'user',
+          timestamp: new Date().toLocaleTimeString()
+        }
+      ]);
+      setMessage('');
+    }
   };
 
-  if (!selectedChat) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>Chats</Text>
-        </View>
-        <FlatList
-          data={conversations}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => (
-            <TouchableOpacity 
-              style={styles.conversationItem}
-              onPress={() => setSelectedChat(item)}
-            >
-              <View style={styles.avatarContainer}>
-                <Icon name="person-circle" size={40} color="#059669" />
-              </View>
-              <View style={styles.conversationDetails}>
-                <Text style={styles.conversationName}>{item.name}</Text>
-                <Text style={styles.lastMessage}>{item.lastMessage}</Text>
-              </View>
-            </TouchableOpacity>
-          )}
-        />
-      </SafeAreaView>
-    );
+  const renderMessage = ({ item }) => (
+    <View style={[
+      styles.messageContainer,
+      item.sender === 'user' ? styles.userMessage : styles.otherMessage
+    ]}>
+      <Text style={styles.messageText}>{item.text}</Text>
+      <Text style={styles.timestamp}>{item.timestamp}</Text>
+    </View>
+  );
+
+  if (!selectedContact) {
+    return <ContactList onSelectContact={setSelectedContact} />;
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container}
+    >
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => setSelectedChat(null)}>
-          <Icon name="arrow-back" size={24} color="#fff" />
+        <TouchableOpacity onPress={() => setSelectedContact(null)}>
+          <Icon name="chevron-back" size={24} color="#fff" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>{selectedChat.name}</Text>
+        <Text style={styles.headerTitle}>{selectedContact.name}</Text>
       </View>
-      
       <FlatList
         data={messages}
+        renderItem={renderMessage}
+        keyExtractor={item => item.id}
         style={styles.messagesList}
-        keyExtractor={(item, index) => index.toString()}
-        renderItem={({ item }) => (
-          <View>
-            <Text><strong>{item.senderId}</strong>: {item.content}</Text> {/* Simplified message rendering */}
-          </View>
-        )}
+        inverted={false}
       />
-
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
-          value={messageText}
-          onChangeText={setMessageText}
+          value={message}
+          onChangeText={setMessage}
           placeholder="Type a message..."
           placeholderTextColor="#666"
         />
-        <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
+        <TouchableOpacity onPress={sendMessage} style={styles.sendButton}>
           <Icon name="send" size={24} color="#059669" />
         </TouchableOpacity>
       </View>
-    </SafeAreaView>
+    </KeyboardAvoidingView>
   );
 };
+
+export default Chat;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#111827',
+    backgroundColor: '#111820',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
-    backgroundColor: '#1F2937',
+    padding: 15,
+    backgroundColor: '#1E293B',
   },
   headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
     color: '#fff',
-    marginLeft: 16,
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginLeft: 15,
   },
   messagesList: {
     flex: 1,
-    padding: 16,
+    padding: 10,
   },
   messageContainer: {
     maxWidth: '80%',
-    padding: 12,
-    borderRadius: 16,
-    marginVertical: 4,
+    padding: 10,
+    marginVertical: 5,
+    borderRadius: 15,
   },
-  ownMessage: {
+  userMessage: {
     alignSelf: 'flex-end',
     backgroundColor: '#059669',
   },
   otherMessage: {
     alignSelf: 'flex-start',
-    backgroundColor: '#374151',
+    backgroundColor: '#2C3E50',
   },
   messageText: {
     color: '#fff',
     fontSize: 16,
   },
   timestamp: {
-    color: 'rgba(255,255,255,0.7)',
+    color: '#DDD',
     fontSize: 12,
-    marginTop: 4,
+    marginTop: 5,
     alignSelf: 'flex-end',
   },
   inputContainer: {
     flexDirection: 'row',
-    padding: 16,
-    backgroundColor: '#1F2937',
+    padding: 10,
+    backgroundColor: '#1E293B',
   },
   input: {
     flex: 1,
-    backgroundColor: '#374151',
-    borderRadius: 24,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    backgroundColor: '#2C3E50',
+    borderRadius: 20,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    marginRight: 10,
     color: '#fff',
-    marginRight: 8,
   },
   sendButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#374151',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#2C3E50',
+  },
+  contactListContainer: {
+    flex: 1,
+    backgroundColor: '#111820',
+  },
+  contactList: {
+    flex: 1,
+  },
+  contactItem: {
+    flexDirection: 'row',
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#2C3E50',
+    alignItems: 'center',
+  },
+  contactAvatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#059669',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  conversationItem: {
-    flexDirection: 'row',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#1F2937',
+  avatarText: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: 'bold',
   },
-  avatarContainer: {
-    marginRight: 16,
-  },
-  conversationDetails: {
+  contactInfo: {
+    marginLeft: 15,
     flex: 1,
-    justifyContent: 'center',
   },
-  conversationName: {
+  contactName: {
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
   },
   lastMessage: {
-    color: '#9CA3AF',
+    color: '#666',
     fontSize: 14,
-    marginTop: 4,
+    marginTop: 2,
   },
 });
-
-export default Chat;

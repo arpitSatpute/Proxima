@@ -34,7 +34,7 @@ const Dash = () => {
 
         <TouchableOpacity 
           style={styles.card} 
-          onPress={() => navigation.navigate('EmployeeDash')} // Hardcoded navigation
+          onPress={() => navigation.navigate('EmployeeDash')} 
         >
           <Icon name='briefcase' size={32} color="#059669" />
           <Text style={styles.cardTitle}>Employee Dashboard</Text>
@@ -43,7 +43,7 @@ const Dash = () => {
 
         <TouchableOpacity 
           style={styles.card} 
-          onPress={() => navigation.navigate('CollegeDash')} // Hardcoded navigation
+          onPress={() => navigation.navigate('CollegeDash')} 
         >
           <Icon name='ribbon' size={32} color="#059669" />
           <Text style={styles.cardTitle}>College Dashboard</Text>
