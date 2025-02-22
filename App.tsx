@@ -1,8 +1,9 @@
+
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { Image, View, Text } from 'react-native'; // Import Image and View components
+import { Image, View, Text, TouchableOpacity } from 'react-native';
 
 import MentorSearch from './components/mentor/MentorSearch';
 import Home from './components/Home';
@@ -13,8 +14,7 @@ import StudentProfile from './components/student/StudentProfile';
 import Chat from './components/Chat/Chat';
 import Dash from './components/Dash';
 import AdminDash from './components/Admin/AdminDash';
-import Logo from './assets/Logo.png';
-
+import EmployerDash from './components/employer/EmployerDash';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -27,8 +27,6 @@ const TabNavigator = () => (
       tabBarInactiveTintColor: 'lightgray',
       tabBarStyle: {
         backgroundColor: '#111820',
-        // elevation: 0, // Remove shadow on Android
-        // borderTopWidth: 0, // Remove top border
       },
     }}>
     <Tab.Screen
@@ -103,20 +101,37 @@ export default function App() {
         <Stack.Screen
           name="Proxima"
           component={TabNavigator}
-          options={{
+          options={({ navigation }) => ({
             headerShown: true,
             headerTitle: () => (
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <Image
-                  source={require('./assets/Logo.png')} // Replace with your image path
-                  style={{ width: 40, height: 40 }} // Adjust size as needed
+                  source={require('./assets/Logo.png')}
+                  style={{ width: 40, height: 40 }}
                 />
                 <Text style={{ color: '#fff', fontSize: 24, fontWeight: 'bold', marginLeft: 2 }}>
                   Proxima
                 </Text>
               </View>
             ),
-          }}
+            headerRight: () => (
+              <TouchableOpacity 
+                onPress={() => navigation.navigate('StudentProfile')}
+                style={{ marginRight: 15 }}
+              >
+                <View style={{
+                  width: 35,
+                  height: 35,
+                  borderRadius: 17.5,
+                  backgroundColor: '#059669',
+                  justifyContent: 'center',
+                  alignItems: 'center'
+                }}>
+                  <Icon name="person" size={20} color="#fff" />
+                </View>
+              </TouchableOpacity>
+            )
+          })}
         />
         <Stack.Screen
           name="MentorDash"
@@ -138,12 +153,13 @@ export default function App() {
           component={StudentProfile}
           options={{ title: 'Student Profile' }}
         />
-        {/* <Stack.Screen
+        <Stack.Screen
           name="EmployerDash"
           component={EmployerDash}
-          options={{ title: 'EmployerDash' }}
-        /> */}
+          options={{ title: 'Employer Dashboard' }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
 }
+

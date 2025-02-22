@@ -9,15 +9,17 @@ import {
   Animated,
   Platform
 } from 'react-native';
-
+import { useNavigation } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 const { width, height } = Dimensions.get('window');
 
-const Home = ({ navigation }) => {
+const Home = () => {
+  const navigation = useNavigation();
   const [scrollY] = useState(new Animated.Value(0));
   const [floatAnims] = useState({
     orb1: new Animated.Value(0),
-    orb2: new Animated.Value(0),
+    orb2: new Animated.Value(0), 
     orb3: new Animated.Value(0),
     orb4: new Animated.Value(0)
   });
@@ -50,52 +52,56 @@ const Home = ({ navigation }) => {
     ]).start();
   }, []);
 
- 
   const features = [
     {
       title: "AI Resume Tailoring",
       description: "Get personalized resume optimization using advanced AI",
       backgroundColor: '#059669',
-      gradient: ['#059669', '#047857']
+      gradient: ['#059669', '#047857'],
+      icon: 'document-text',
+      navigate: 'StudentProfile'
     },
     {
       title: "Mentor Connect",
       description: "Connect with industry experts who can guide your career journey",
       backgroundColor: '#10b981',
-      gradient: ['#10b981', '#059669']
+      gradient: ['#10b981', '#059669'],
+      icon: 'people',
+      navigate: 'MentorSearch'
     },
     {
-      title: "AI Resume Tailoring",
-      description: "Get personalized resume optimization using advanced AI",
+      title: "Job Search",
+      description: "Find your dream job with AI-powered job matching",
       backgroundColor: '#059669',
-      gradient: ['#059669', '#047857']
+      gradient: ['#059669', '#047857'],
+      icon: 'briefcase',
+      navigate: 'Jobs'
     },
     {
-      title: "Mentor Connect",
-      description: "Connect with industry experts who can guide your career journey",
+      title: "Skill Development",
+      description: "Access courses and resources to build in-demand skills",
       backgroundColor: '#10b981',
-      gradient: ['#10b981', '#059669']
-    },
-    
-    
+      gradient: ['#10b981', '#059669'],
+      icon: 'school',
+      navigate: 'CollegeDash'
+    }
   ];
 
-  const FeatureCard = ({ title, description, gradient }) => {
+  const FeatureCard = ({ title, description, gradient, icon, navigate }) => {
     const CardContainer = Platform.OS === 'ios' ? BlurView : View;
     const cardProps = Platform.OS === 'ios' ? {
       blurType: "dark",
       blurAmount: 20,
     } : {};
-
     return (
       <TouchableOpacity 
         activeOpacity={0.9}
-        onPress={() => navigation.navigate('Feature', { title })}
+        onPress={() => navigation.navigate(navigate)}
       >
         <CardContainer style={styles.card} {...cardProps}>
           <View style={[styles.cardContent, { backgroundColor: Platform.OS === 'ios' ? 'transparent' : 'rgba(255, 255, 255, 0.07)' }]}>
             <View style={[styles.iconContainer, { backgroundColor: gradient[0] }]}>
-              <Text style={styles.iconText}>{title[0]}</Text>
+              <Icon name={icon} size={24} color="#fff" />
             </View>
             <Text style={styles.cardTitle}>{title}</Text>
             <Text style={styles.cardDescription}>{description}</Text>
@@ -124,9 +130,6 @@ const Home = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-  
-      
-      
       {/* Floating Orbs */}
       <FloatingOrb style={styles.orb1} anim={floatAnims.orb1} />
       <FloatingOrb style={styles.orb2} anim={floatAnims.orb2} />
@@ -151,11 +154,13 @@ const Home = ({ navigation }) => {
           </Text>
           
           <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.primaryButton}>
+            <TouchableOpacity onPress={() => navigation.navigate('MentorSearch')} style={styles.primaryButton}>
+              <Icon name="rocket" size={20} color="#fff" style={{marginRight: 8}} />
               <Text style={styles.buttonText}>Get Started</Text>
             </TouchableOpacity>
             
-            <TouchableOpacity style={styles.secondaryButton}>
+            <TouchableOpacity onPress={() => navigation.navigate('MentorSearch')} style={styles.secondaryButton}>
+              <Icon name="people" size={20} color="#fff" style={{marginRight: 8}} />
               <Text style={styles.secondaryButtonText}>Find a Mentor</Text>
             </TouchableOpacity>
           </View>
@@ -175,7 +180,11 @@ const Home = ({ navigation }) => {
           <Text style={styles.ctaSubtitle}>
             Join our community of mentors and professionals
           </Text>
-          <TouchableOpacity style={styles.ctaButton}>
+          <TouchableOpacity 
+            style={styles.ctaButton}
+            onPress={() => navigation.navigate('StudentProfile')}
+          >
+            <Icon name="arrow-forward" size={20} color="#fff" style={{marginRight: 8}} />
             <Text style={styles.ctaButtonText}>Join Now</Text>
           </TouchableOpacity>
         </View>
@@ -189,7 +198,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#0B1121',
   },
-  
   scrollView: {
     flex: 1,
   },
@@ -262,6 +270,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 4,
+    flexDirection: 'row',
+    justifyContent: 'center',
   },
   secondaryButton: {
     backgroundColor: 'rgba(255, 255, 255, 0.08)',
@@ -270,6 +280,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: 'rgba(16, 185, 129, 0.3)',
+    flexDirection: 'row',
+    justifyContent: 'center',
   },
   buttonText: {
     color: '#ffffff',
@@ -314,11 +326,6 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 4,
   },
-  iconText: {
-    color: '#ffffff',
-    fontSize: 22,
-    fontWeight: 'bold',
-  },
   cardTitle: {
     fontSize: 22,
     fontWeight: '700',
@@ -361,6 +368,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 4,
+    flexDirection: 'row',
+    justifyContent: 'center',
   },
   ctaButtonText: {
     color: '#ffffff',
